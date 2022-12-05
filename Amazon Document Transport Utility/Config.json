@@ -1,0 +1,16 @@
+{
+    "configName": null,
+    "continuous": false,
+    "accessKey": null,
+    "secretKey": null,
+    "roleARN": null,
+    "clinetId": null,
+    "clientSecret": null,
+    "refreshToken": null,
+    "marketplace": null,
+    "documentDownloadFolder": null,
+    "documentUploadFolder": null,
+    "documentCompletedFolder": null,
+    "documentFailedFolder": null,
+    "downloadDocumentFileName":  null
+}
