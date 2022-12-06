@@ -4,13 +4,15 @@
     "accessKey": null,
     "secretKey": null,
     "roleARN": null,
-    "clinetId": null,
+    "clientId": null,
     "clientSecret": null,
     "refreshToken": null,
     "marketplace": null,
     "documentDownloadFolder": null,
-    "documentUploadFolder": null,
-    "documentCompletedFolder": null,
+    "documentUploadCompletedFolder": null,
+    "documentUploadFailedFolder": null,
     "documentFailedFolder": null,
-    "downloadDocumentFileName":  null
+    "downloadDocumentFileName": null,
+    "downloadDocumteType": null,
+    "uploadDocumentType": null
 }
