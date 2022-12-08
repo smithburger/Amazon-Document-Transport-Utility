@@ -59,6 +59,7 @@ namespace Amazon_Document_Transport_Utility
                 logger.Info("Uploading documents: " + config.uploadDocumentType + " Result: " + successful);
             }
 
+            // Explicitly close the logger so it clears the buffers. If you leave it to chance sometimes it will not purge the buffer and close the logs.
             LogManager.Shutdown();
         }
 
@@ -75,16 +76,7 @@ namespace Amazon_Document_Transport_Utility
             switch (downloadDocumteType)
             {
                 case "GET_FLAT_FILE_ACTIONABLE_ORDER_DATA_SHIPPING":
-                case "GET_FLAT_FILE_ALL_ORDERS_DATA_BY_LAST_UPDATE_GENERAL":
-                case "GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL":
-                case "GET_FLAT_FILE_ARCHIVED_ORDERS_DATA_BY_ORDER_DATE":
-                case "GET_FLAT_FILE_GEO_OPPORTUNITIES":
-                case "GET_FLAT_FILE_MFN_SKU_RETURN_ATTRIBUTES_REPORT":
-                case "GET_FLAT_FILE_OPEN_LISTINGS_DATA":
-                case "GET_FLAT_FILE_ORDER_REPORT_DATA_SHIPPING":
-                case "GET_FLAT_FILE_ORDERS_RECONCILIATION_DATA_SHIPPING":
-                case "GET_FLAT_FILE_RETURNS_DATA_BY_RETURN_DATE":
-                    return DownloadOrderOrderReport(amazonConnection, downloadDocumteType, documentDownloadFolder, downloadDocumentFileName);
+                    return DownloadFlatFileOrderReport(amazonConnection, downloadDocumteType, documentDownloadFolder, downloadDocumentFileName);
 
                 default:
                     return "Failed: Invalid document type.";
@@ -105,15 +97,15 @@ namespace Amazon_Document_Transport_Utility
             switch (uploadDocumentType)
             {
                 case "POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA":
-                    return UploadFlatFilePriceAndQuantityDocument(amazonConnection, uploadDocumentType, documentUploadFolder, documentUploadCompletedFolder, documentUploadFailedFolder);
-
+                case "POST_FLAT_FILE_FULFILLMENT_DATA":
+                    return UploadFlatFileFeed(amazonConnection, uploadDocumentType, documentUploadFolder, documentUploadCompletedFolder, documentUploadFailedFolder);
                 default:
                     return "Failed: Invalid document type.";
             }
         }
 
         /// <summary>
-        /// Upload flat file tab deliminated Amazon inventory price and quantity update files. Scans folder and uploads all files from that folder.
+        /// Upload flat file tab deliminated Amazon feed files. Scans folder and uploads all files from that folder.
         /// Moves file to completed or failed folder when done.
         /// </summary>
         /// <param name="amazonConnection"></param>
@@ -122,7 +114,7 @@ namespace Amazon_Document_Transport_Utility
         /// <param name="documentUploadCompletedFolder"></param>
         /// <param name="documentUploadFailedFolder"></param>
         /// <returns></returns>
-        private static string UploadFlatFilePriceAndQuantityDocument(AmazonConnection amazonConnection, string uploadDocumentType, string documentUploadFolder, string documentUploadCompletedFolder, string documentUploadFailedFolder)
+        private static string UploadFlatFileFeed(AmazonConnection amazonConnection, string uploadDocumentType, string documentUploadFolder, string documentUploadCompletedFolder, string documentUploadFailedFolder)
         {
             // Scan the upload document folder for files.
             if (Directory.Exists(documentUploadFolder))
@@ -131,17 +123,20 @@ namespace Amazon_Document_Transport_Utility
                 {
                     string[] files = Directory.GetFiles(documentUploadFolder);
 
+                    // Convert the string report type to the enum.
+                    FeedType reportType;
+                    Enum.TryParse<FeedType>(uploadDocumentType, out reportType);
+
                     foreach (var file in files)
                     {
-                        // We need to create a valid uri from the local path to pass to the library.
-                        var feedID = amazonConnection.Feed.SubmitFeed(file, FeedType.POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA, null, null, ContentType.TXT);
+                        var feedID = amazonConnection.Feed.SubmitFeed(file, reportType, null, null, ContentType.TXT);
 
                         Thread.Sleep(1000 * 30);
                         var feedOutput = amazonConnection.Feed.GetFeed(feedID);
 
                         while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
                         {
-                            Console.WriteLine("Monitoring status of upload feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
+                            Console.WriteLine("Monitoring status of uploaded feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
                             Thread.Sleep(1000 * 30);
                             feedOutput = amazonConnection.Feed.GetFeed(feedID);
                         }
@@ -156,13 +151,13 @@ namespace Amazon_Document_Transport_Utility
                         else
                         {
                             File.Move(file, documentUploadFailedFolder + Path.GetFileName(file));
-                            logger.Debug("Failed to upload POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA: " + file);
+                            logger.Debug("Failed to upload flat file feed: " + uploadDocumentType + " " + file);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    logger.Debug("Error uploading POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA: " + e.ToString());
+                    logger.Debug("Error uploading flat file feed: " + uploadDocumentType + " " + e.ToString());
                     return "Failed";
                 }
             }
@@ -183,7 +178,7 @@ namespace Amazon_Document_Transport_Utility
         /// <param name="documentDownloadFolder"></param>
         /// <param name="downloadDocumentFileName"></param>
         /// <returns></returns>
-        private static string DownloadOrderOrderReport(AmazonConnection amazonConnection, string downloadDocumteType, string documentDownloadFolder, string downloadDocumentFileName)
+        private static string DownloadFlatFileOrderReport(AmazonConnection amazonConnection, string downloadDocumteType, string documentDownloadFolder, string downloadDocumentFileName)
         {
             try
             {
