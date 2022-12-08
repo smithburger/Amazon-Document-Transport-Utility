@@ -46,8 +46,8 @@ namespace Amazon_Document_Transport_Utility
             // Check if there is a download document type specified.
             if (!String.IsNullOrEmpty(config.downloadDocumteType))
             {
-                //var successful = DownloadDocumentSwitcher(amazonConnection, config.downloadDocumteType, config.documentDownloadFolder, config.downloadDocumentFileName);
-                //logger.Info("Downloading document: " + config.downloadDocumteType + " Result: " + successful);
+                var successful = DownloadDocumentSwitcher(amazonConnection, config.downloadDocumteType, config.documentDownloadFolder, config.downloadDocumentFileName);
+                logger.Info("Downloading document: " + config.downloadDocumteType + " Result: " + successful);
             }
 
             // Check if there is a upload document type specified.
@@ -202,8 +202,8 @@ namespace Amazon_Document_Transport_Utility
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error downloading Order Report: " + e);
-                logger.Debug("Error downloading Order Report: " + e);
+                Console.WriteLine("Error downloading Report: " + downloadDocumteType + " " + e.ToString());
+                logger.Debug("Error downloading Report: " + downloadDocumteType + " " + e.ToString());
                 return "Failed";
             }
 
