@@ -91,6 +91,15 @@ namespace Amazon_Document_Transport_Utility
             }
         }
 
+        /// <summary>
+        /// There is support for a lot of different document types to upload. We have to send specific types to their respective functions to upload.
+        /// </summary>
+        /// <param name="amazonConnection"></param>
+        /// <param name="uploadDocumentType"></param>
+        /// <param name="documentUploadFolder"></param>
+        /// <param name="documentUploadCompletedFolder"></param>
+        /// <param name="documentUploadFailedFolder"></param>
+        /// <returns></returns>
         private static string UploadDocumentSwitcher(AmazonConnection amazonConnection, string uploadDocumentType, string documentUploadFolder, string documentUploadCompletedFolder, string documentUploadFailedFolder)
         {
             switch (uploadDocumentType)
@@ -103,33 +112,58 @@ namespace Amazon_Document_Transport_Utility
             }
         }
 
+        /// <summary>
+        /// Upload flat file tab deliminated Amazon inventory price and quantity update files. Scans folder and uploads all files from that folder.
+        /// Moves file to completed or failed folder when done.
+        /// </summary>
+        /// <param name="amazonConnection"></param>
+        /// <param name="uploadDocumentType"></param>
+        /// <param name="documentUploadFolder"></param>
+        /// <param name="documentUploadCompletedFolder"></param>
+        /// <param name="documentUploadFailedFolder"></param>
+        /// <returns></returns>
         private static string UploadFlatFilePriceAndQuantityDocument(AmazonConnection amazonConnection, string uploadDocumentType, string documentUploadFolder, string documentUploadCompletedFolder, string documentUploadFailedFolder)
         {
             // Scan the upload document folder for files.
             if (Directory.Exists(documentUploadFolder))
             {
-                string[] files = Directory.GetFiles(documentUploadFolder);
-
-                foreach (var file in files)
+                try
                 {
-                    // We need to create a valid uri from the local path to pass to the library.
-                    var feedID = amazonConnection.Feed.SubmitFeed(file, FeedType.POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA, null, null, ContentType.TXT);
+                    string[] files = Directory.GetFiles(documentUploadFolder);
 
-                    Thread.Sleep(1000 * 30);
-                    var feedOutput = amazonConnection.Feed.GetFeed(feedID);
-                    //var outPut = amazonConnection.Feed.GetFeedDocument(feedOutput.ResultFeedDocumentId);
-                    //var reportOutpit = outPut.Url;
-                    //var processingReport = amazonConnection.Feed.GetFeedDocumentProcessingReport(outPut.Url);
-
-                    while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
+                    foreach (var file in files)
                     {
-                        Console.WriteLine("Monitoring status of upload feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
-                        Thread.Sleep(1000 * 30);
-                        feedOutput = amazonConnection.Feed.GetFeed(feedID);
-                    }
+                        // We need to create a valid uri from the local path to pass to the library.
+                        var feedID = amazonConnection.Feed.SubmitFeed(file, FeedType.POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA, null, null, ContentType.TXT);
 
-                    Console.WriteLine("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
-                    logger.Info("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
+                        Thread.Sleep(1000 * 30);
+                        var feedOutput = amazonConnection.Feed.GetFeed(feedID);
+
+                        while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
+                        {
+                            Console.WriteLine("Monitoring status of upload feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
+                            Thread.Sleep(1000 * 30);
+                            feedOutput = amazonConnection.Feed.GetFeed(feedID);
+                        }
+
+                        Console.WriteLine("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
+                        logger.Info("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
+
+                        if (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.DONE)
+                        {
+                            File.Move(file, documentUploadCompletedFolder + Path.GetFileName(file));
+                        }
+                        else
+                        {
+                            File.Move(file, documentUploadFailedFolder + Path.GetFileName(file));
+                            logger.Debug("Failed to upload POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA: " + file);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.Debug("Error uploading POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA: " + e.ToString());
+                    return "Failed";
                 }
             }
             else
