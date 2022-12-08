@@ -19,5 +19,6 @@ namespace Amazon_Document_Transport_Utility
         public string documentUploadFailedFolder { get; set; }
         public string downloadDocumentFileName { get; set; }
         public string downloadDocumteType { get; set; }
+        public string uploadDocumentType { get; set; }
     }
 }

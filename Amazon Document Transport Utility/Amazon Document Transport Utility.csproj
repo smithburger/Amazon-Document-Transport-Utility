@@ -43,7 +43,8 @@
       <HintPath>..\packages\AWSSDK.SQS.3.7.100.19\lib\net45\AWSSDK.SQS.dll</HintPath>
     </Reference>
     <Reference Include="FikaAmazonAPI, Version=1.5.24.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpAmazonSpAPI.1.5.24\lib\netstandard2.0\FikaAmazonAPI.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\utilities\Amazon-SP-API-CSharp\Source\FikaAmazonAPI\bin\Debug\netstandard2.0\FikaAmazonAPI.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.5.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>

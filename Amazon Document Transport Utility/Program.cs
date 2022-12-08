@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using static FikaAmazonAPI.Utils.Constants;
 
@@ -42,12 +43,22 @@ namespace Amazon_Document_Transport_Utility
                 MarketPlace =  MarketPlace.US //MarketPlace.GetMarketplaceByCountryCode(config.marketplace),
             });
 
+            // Check if there is a download document type specified.
             if (!String.IsNullOrEmpty(config.downloadDocumteType))
             {
-                var successful = DownloadDocumentSwitcher(amazonConnection, config.downloadDocumteType, config.documentDownloadFolder, config.downloadDocumentFileName);
-                logger.Info("Downloading document: " + config.downloadDocumteType + " Result: " + successful);
+                //var successful = DownloadDocumentSwitcher(amazonConnection, config.downloadDocumteType, config.documentDownloadFolder, config.downloadDocumentFileName);
+                //logger.Info("Downloading document: " + config.downloadDocumteType + " Result: " + successful);
             }
-            
+
+            // Check if there is a upload document type specified.
+            // If there is we scan the specified folder and upload ALL documents in that folder.
+            if (!String.IsNullOrEmpty(config.uploadDocumentType))
+            {
+                logger.Info("Scanning upload documents folder.");
+                var successful = UploadDocumentSwitcher(amazonConnection, config.uploadDocumentType, config.documentUploadFolder, config.documentUploadCompletedFolder, config.documentUploadFailedFolder);
+                logger.Info("Uploading documents: " + config.uploadDocumentType + " Result: " + successful);
+            }
+
             LogManager.Shutdown();
         }
 
@@ -78,6 +89,56 @@ namespace Amazon_Document_Transport_Utility
                 default:
                     return "Failed: Invalid document type.";
             }
+        }
+
+        private static string UploadDocumentSwitcher(AmazonConnection amazonConnection, string uploadDocumentType, string documentUploadFolder, string documentUploadCompletedFolder, string documentUploadFailedFolder)
+        {
+            switch (uploadDocumentType)
+            {
+                case "POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA":
+                    return UploadFlatFilePriceAndQuantityDocument(amazonConnection, uploadDocumentType, documentUploadFolder, documentUploadCompletedFolder, documentUploadFailedFolder);
+
+                default:
+                    return "Failed: Invalid document type.";
+            }
+        }
+
+        private static string UploadFlatFilePriceAndQuantityDocument(AmazonConnection amazonConnection, string uploadDocumentType, string documentUploadFolder, string documentUploadCompletedFolder, string documentUploadFailedFolder)
+        {
+            // Scan the upload document folder for files.
+            if (Directory.Exists(documentUploadFolder))
+            {
+                string[] files = Directory.GetFiles(documentUploadFolder);
+
+                foreach (var file in files)
+                {
+                    // We need to create a valid uri from the local path to pass to the library.
+                    var feedID = amazonConnection.Feed.SubmitFeed(file, FeedType.POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA, null, null, ContentType.TXT);
+
+                    Thread.Sleep(1000 * 30);
+                    var feedOutput = amazonConnection.Feed.GetFeed(feedID);
+                    //var outPut = amazonConnection.Feed.GetFeedDocument(feedOutput.ResultFeedDocumentId);
+                    //var reportOutpit = outPut.Url;
+                    //var processingReport = amazonConnection.Feed.GetFeedDocumentProcessingReport(outPut.Url);
+
+                    while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
+                    {
+                        Console.WriteLine("Monitoring status of upload feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
+                        Thread.Sleep(1000 * 30);
+                        feedOutput = amazonConnection.Feed.GetFeed(feedID);
+                    }
+
+                    Console.WriteLine("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
+                    logger.Info("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
+                }
+            }
+            else
+            {
+                logger.Debug("Failed: Upload documents folder does not exist: " + documentUploadFolder);
+                return "Failed: Upload documents folder does not exist: " + documentUploadFolder;
+            }
+
+            return "Success";
         }
 
         /// <summary>
