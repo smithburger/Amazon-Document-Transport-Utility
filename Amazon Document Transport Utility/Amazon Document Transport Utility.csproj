@@ -3,12 +3,12 @@
     <TargetFramework>net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	
+    <PublishSingleFile>true</PublishSingleFile>
+	
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FikaAmazonAPI, Version=1.5.24.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\utilities\Amazon-SP-API-CSharp\Source\FikaAmazonAPI\bin\Debug\netstandard2.0\FikaAmazonAPI.dll</HintPath>
-    </Reference>
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Transactions" />
   </ItemGroup>
@@ -19,20 +19,19 @@
     <None Update="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\AWSSDK.SecurityToken.3.7.100.19\analyzers\dotnet\cs\AWSSDK.SecurityToken.CodeAnalysis.dll" />
     <Analyzer Include="..\packages\AWSSDK.SQS.3.7.100.19\analyzers\dotnet\cs\AWSSDK.SQS.CodeAnalysis.dll" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpAmazonSpAPI" Version="1.5.24" />
-    <PackageReference Include="NLog.Config" Version="4.7.15" />
+    <PackageReference Include="CSharpAmazonSpAPI" Version="1.5.27" />
+    <PackageReference Include="NLog" Version="5.1.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
-    <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
-    <PackageReference Include="System.ServiceModel.Federation" Version="4.8.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+    <PackageReference Include="System.ServiceModel.Duplex" Version="4.10.0" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.0" />
+    <PackageReference Include="System.ServiceModel.Federation" Version="4.10.0" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.355802">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
