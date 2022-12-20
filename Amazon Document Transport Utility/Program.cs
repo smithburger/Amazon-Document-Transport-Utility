@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -18,11 +19,14 @@ namespace Amazon_Document_Transport_Utility
         private static Logger logger = LogManager.GetCurrentClassLogger();
         static void Main(string[] args)
         {
+            // Path to the config application exe. We need this because the application is usually ran from task scheduler.
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
             // Load the config settings
             var config = new Config();
             try
             {
-                config = JsonSerializer.Deserialize<Config>(File.ReadAllText("Config.json"));
+                config = JsonSerializer.Deserialize<Config>(File.ReadAllText(Path.Combine(path, "Config.json")));
             }
             catch (Exception e)
             {

@@ -3,14 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amazon Document Transport Utility", "Amazon Document Transport Utility\Amazon Document Transport Utility.csproj", "{EAB1A296-080C-4329-8B6D-0463FB6A7005}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amazon Document Transport Utility", "Amazon Document Transport Utility\Amazon Document Transport Utility.csproj", "{EAB1A296-080C-4329-8B6D-0463FB6A7005}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{98D1F338-8478-452B-B02D-865246E38FA4}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FikaAmazonAPI", "..\..\utilities\Amazon-SP-API-CSharp\Source\FikaAmazonAPI\FikaAmazonAPI.csproj", "{1CDC0171-455C-43CB-AF43-6B63AC5340DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,10 +20,6 @@ Global
 		{EAB1A296-080C-4329-8B6D-0463FB6A7005}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAB1A296-080C-4329-8B6D-0463FB6A7005}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAB1A296-080C-4329-8B6D-0463FB6A7005}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1CDC0171-455C-43CB-AF43-6B63AC5340DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1CDC0171-455C-43CB-AF43-6B63AC5340DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1CDC0171-455C-43CB-AF43-6B63AC5340DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1CDC0171-455C-43CB-AF43-6B63AC5340DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
