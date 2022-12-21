@@ -14,5 +14,8 @@
     "documentFailedFolder": null,
     "downloadDocumentFileName": null,
     "downloadDocumteType": null,
-    "uploadDocumentType": null
+    "uploadDocumentType": null,
+    "startDate": 0,
+    "endDate": 0,
+    "PII":  true
 }
