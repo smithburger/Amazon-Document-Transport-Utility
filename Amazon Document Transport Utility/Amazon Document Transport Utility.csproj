@@ -3,10 +3,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-	
-    <PublishSingleFile>true</PublishSingleFile>
-	
+	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>	
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.IO.Compression" />

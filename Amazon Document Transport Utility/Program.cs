@@ -51,16 +51,13 @@ namespace Amazon_Document_Transport_Utility
             if (!String.IsNullOrEmpty(config.downloadDocumentType))
             {
                 var successful = DownloadDocumentSwitcher(amazonConnection, config);
-                logger.Info("Downloading document: " + config.downloadDocumentType + " Result: " + successful);
             }
 
             // Check if there is a upload document type specified.
             // If there is we scan the specified folder and upload ALL documents in that folder.
             if (!String.IsNullOrEmpty(config.uploadDocumentType))
             {
-                logger.Info("Scanning upload documents folder.");
                 var successful = UploadDocumentSwitcher(amazonConnection, config);
-                logger.Info("Uploading documents: " + config.uploadDocumentType + " Result: " + successful);
             }
 
             // Explicitly close the logger so it clears the buffers. If you leave it to chance sometimes it will not purge the buffer and close the logs.
@@ -125,6 +122,8 @@ namespace Amazon_Document_Transport_Utility
             // Scan the upload document folder for files.
             if (Directory.Exists(config.documentUploadFolder))
             {
+                logger.Info("Scanning upload documents folder.");
+
                 try
                 {
                     string[] files = Directory.GetFiles(config.documentUploadFolder);
@@ -137,38 +136,42 @@ namespace Amazon_Document_Transport_Utility
                     {
                         var feedID = amazonConnection.Feed.SubmitFeed(file, reportType, null, null, ContentType.TXT);
 
+                        // Wait some time so we can get a Feed ID
                         Thread.Sleep(1000 * 30);
                         var feedOutput = amazonConnection.Feed.GetFeed(feedID);
 
-                        while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
+                        // Once the file is INPROGRESS we move it to the finished file. We don't wait to see if it was successful or not.
+                        // Some inventory files are huge. Waiting on them to upload before moving on would be detrimental.
+                        if (!String.IsNullOrEmpty(feedOutput.FeedId))
                         {
-                            Console.WriteLine("Monitoring status of uploaded feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
-                            Thread.Sleep(1000 * 30);
-                            feedOutput = amazonConnection.Feed.GetFeed(feedID);
-                        }
-
-                        Console.WriteLine("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
-                        logger.Info("Uploading file: " + Path.GetFileName(file) + " Results: " + feedOutput.ProcessingStatus + " Feed ID: " + feedID);
-
-                        if (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.DONE)
-                        {
-                            File.Move(file, Path.Combine(config.documentUploadCompletedFolder, Path.GetFileName(file)));
+                            Console.WriteLine("Uploading file: " + Path.GetFileName(file) + " Feed ID: " + feedID);
+                            logger.Info("Uploading file: " + Path.GetFileName(file) + " Feed ID: " + feedID);
+                            File.Move(file, Path.Combine(config.documentUploadCompletedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
                         }
                         else
                         {
-                            File.Move(file, Path.Combine(config.documentUploadFailedFolder, Path.GetFileName(file)));
+                            File.Move(file, Path.Combine(config.documentUploadFailedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
                             logger.Debug("Failed to upload flat file feed: " + config.uploadDocumentType + " " + file);
                         }
+
+                        //while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
+                        //{
+                            //Console.WriteLine("Monitoring status of uploaded feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
+                            //Thread.Sleep(1000 * 30);
+                            //feedOutput = amazonConnection.Feed.GetFeed(feedID);
+                        //}
                     }
                 }
                 catch (Exception e)
                 {
+                    logger.Info("Error uploading flat file feed: " + config.uploadDocumentType + " " + e.ToString());
                     logger.Debug("Error uploading flat file feed: " + config.uploadDocumentType + " " + e.ToString());
                     return "Failed";
                 }
             }
             else
             {
+                logger.Info("Failed: Upload documents folder does not exist: " + config.documentUploadFolder);
                 logger.Debug("Failed: Upload documents folder does not exist: " + config.documentUploadFolder);
                 return "Failed: Upload documents folder does not exist: " + config.documentUploadFolder;
             }
@@ -213,6 +216,9 @@ namespace Amazon_Document_Transport_Utility
                         File.Delete(destFile);
 
                     File.Move(report, destFile);
+
+                    logger.Info("Downloading document: " + config.downloadDocumentType + " Result: Success");
+                    Console.WriteLine("Downloading document: " + config.downloadDocumentType + " Result: Success");
                 }
             }
             catch (Exception e)
