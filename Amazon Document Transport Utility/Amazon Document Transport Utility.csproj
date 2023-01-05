@@ -4,6 +4,9 @@
     <OutputType>Exe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>	
+	<PublishSingleFile>true</PublishSingleFile>	
+	<PlatformTarget>AnyCPU</PlatformTarget>
+	<!-- <PublishTrimmed>true</PublishTrimmed> -->
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.IO.Compression" />

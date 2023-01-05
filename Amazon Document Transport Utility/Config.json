@@ -1,21 +1,38 @@
 {
-    "configName": null,
+    "configName": "",
     "continuous": false,
-    "accessKey": null,
-    "secretKey": null,
-    "roleARN": null,
-    "clientId": null,
-    "clientSecret": null,
-    "refreshToken": null,
-    "marketplace": null,
-    "documentDownloadFolder": null,
-    "documentUploadCompletedFolder": null,
-    "documentUploadFailedFolder": null,
-    "documentFailedFolder": null,
-    "downloadDocumentFileName": null,
-    "downloadDocumteType": null,
-    "uploadDocumentType": null,
-    "startDate": 0,
-    "endDate": 0,
-    "PII":  true
+    "continuousSeconds": 300,
+    "accessKey": "",
+    "secretKey": "",
+    "roleARN": "",
+    "clientId": "",
+    "clientSecret": "",
+    "refreshToken": "",
+    "marketplace": "US",
+    "documents": [
+        {
+            "documentDownloadFolder": "",
+            "documentUploadFolder": "",
+            "documentUploadCompletedFolder": "",
+            "documentUploadFailedFolder": "",
+            "downloadDocumentFileName": "",
+            "downloadDocumentType": "",
+            "uploadDocumentType": "",
+            "startDate": 0,
+            "endDate": 0,
+            "PII": true
+        },
+        {
+            "documentDownloadFolder": "",
+            "documentUploadFolder": "",
+            "documentUploadCompletedFolder": "",
+            "documentUploadFailedFolder": "",
+            "downloadDocumentFileName": "",
+            "downloadDocumentType": "",
+            "uploadDocumentType": "",
+            "startDate": 0,
+            "endDate": 0,
+            "PII": true
+        }
+    ]
 }

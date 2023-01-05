@@ -1,28 +1,78 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Amazon_Document_Transport_Utility
 {
     internal class Config
     {
-        public string configName { get; set; }
-        public bool continuous { get; set; }
-        public string accessKey { get; set; }
-        public string secretKey { get; set; }
-        public string roleARN { get; set; }
-        public string clientId { get; set; }
-        public string clientSecret { get; set; }
-        public string refreshToken { get; set; }
-        public string marketplace { get; set; }
-        public string documentDownloadFolder { get; set; }
-        public string documentUploadFolder { get; set; }
-        public string documentUploadCompletedFolder { get; set; }
-        public string documentUploadFailedFolder { get; set; }
-        public string downloadDocumentFileName { get; set; }
-        public string downloadDocumentType { get; set; }
-        public string uploadDocumentType { get; set; }
-        public int startDate { get; set; }
-        public int endDate { get; set; }
+        [JsonPropertyName("configName")]
+        public string ConfigName { get; set; }
+
+        [JsonPropertyName("continuous")]
+        public bool Continuous { get; set; }
+
+        [JsonPropertyName("continuousSeconds")]
+        public int ContinuousSeconds { get; set; }
+
+        [JsonPropertyName("accessKey")]
+        public string AccessKey { get; set; }
+
+        [JsonPropertyName("secretKey")]
+        public string SecretKey { get; set; }
+
+        [JsonPropertyName("roleARN")]
+        public string RoleArn { get; set; }
+
+        [JsonPropertyName("clientId")]
+        public string ClientId { get; set; }
+
+        [JsonPropertyName("clientSecret")]
+        public string ClientSecret { get; set; }
+
+        [JsonPropertyName("refreshToken")]
+        public string RefreshToken { get; set; }
+
+        [JsonPropertyName("marketplace")]
+        public string Marketplace { get; set; }
+
+        [JsonPropertyName("documents")]
+        public List<Document> Documents { get; set; }
+    }
+
+    internal class Document
+    {
+        [JsonPropertyName("documentDownloadFolder")]
+        public string DocumentDownloadFolder { get; set; }
+
+        [JsonPropertyName("documentUploadCompletedFolder")]
+        public string DocumentUploadCompletedFolder { get; set; }
+
+        [JsonPropertyName("documentUploadFailedFolder")]
+        public string DocumentUploadFailedFolder { get; set; }
+
+        [JsonPropertyName("documentFailedFolder")]
+        public string DocumentFailedFolder { get; set; }
+
+        [JsonPropertyName("downloadDocumentFileName")]
+        public string DownloadDocumentFileName { get; set; }
+
+        [JsonPropertyName("documentUploadFolder")]
+        public string DocumentUploadFolder { get; set; }
+
+        [JsonPropertyName("downloadDocumentType")]
+        public string DownloadDocumentType { get; set; }
+
+        [JsonPropertyName("uploadDocumentType")]
+        public string UploadDocumentType { get; set; }
+
+        [JsonPropertyName("startDate")]
+        public int StartDate { get; set; }
+
+        [JsonPropertyName("endDate")]
+        public int EndDate { get; set; }
+
+        [JsonPropertyName("PII")]
         public bool PII { get; set; }
     }
 }

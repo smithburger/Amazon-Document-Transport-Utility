@@ -38,27 +38,49 @@ namespace Amazon_Document_Transport_Utility
             // Setup the SP-API connection configuration class.
             AmazonConnection amazonConnection = new AmazonConnection(new AmazonCredential()
             {
-                AccessKey = config.accessKey,
-                SecretKey = config.secretKey,
-                RoleArn = config.roleARN,
-                ClientId = config.clientId,
-                ClientSecret = config.clientSecret,
-                RefreshToken = config.refreshToken,
+                AccessKey = config.AccessKey,
+                SecretKey = config.SecretKey,
+                RoleArn = config.RoleArn,
+                ClientId = config.ClientId,
+                ClientSecret = config.ClientSecret,
+                RefreshToken = config.RefreshToken,
                 MarketPlace =  MarketPlace.US //MarketPlace.GetMarketplaceByCountryCode(config.marketplace),
             });
 
-            // Check if there is a download document type specified.
-            if (!String.IsNullOrEmpty(config.downloadDocumentType))
-            {
-                var successful = DownloadDocumentSwitcher(amazonConnection, config);
-            }
 
-            // Check if there is a upload document type specified.
-            // If there is we scan the specified folder and upload ALL documents in that folder.
-            if (!String.IsNullOrEmpty(config.uploadDocumentType))
+            do
             {
-                var successful = UploadDocumentSwitcher(amazonConnection, config);
-            }
+                // Cycle through the document array and run all the downloads and uploads.
+                foreach (var document in config.Documents)
+                {
+                    Console.WriteLine("Processing documents: " + DateTime.Now.ToShortTimeString());
+                    // Check if there is a download document type specified.
+                    if (!String.IsNullOrEmpty(document.DownloadDocumentType))
+                    {
+                        var successful = DownloadDocumentSwitcher(amazonConnection, document);
+                    }
+
+                    // Check if there is a upload document type specified.
+                    // If there is we scan the specified folder and upload ALL documents in that folder.
+                    if (!String.IsNullOrEmpty(document.UploadDocumentType))
+                    {
+                        var successful = UploadDocumentSwitcher(amazonConnection, document);
+                    }
+                }
+
+                // Warn the user you not close the window if running i continues mode.
+                if (config.Continuous)
+                {
+                    Console.WriteLine("\nContinues mode is active. Running again in " + config.ContinuousSeconds + " seconds.");
+                    Console.WriteLine("DO NOT CLOSE THIS WINDOW!\n");
+                    Thread.Sleep(config.ContinuousSeconds * 1000); // The config is in seconds so convert to milliseconds.
+                }
+
+            } while (config.Continuous == true);
+
+            
+
+            
 
             // Explicitly close the logger so it clears the buffers. If you leave it to chance sometimes it will not purge the buffer and close the logs.
             LogManager.Shutdown();
@@ -68,18 +90,18 @@ namespace Amazon_Document_Transport_Utility
         /// There is support for a lot of different document types to download. We have to send specific types to their respective functions to download.
         /// </summary>
         /// <param name="amazonConnection"></param>
-        /// <param name="downloadDocumteType"></param>
+        /// <param name="downloadDocumentType"></param>
         /// <param name="documentDownloadFolder"></param>
         /// <param name="downloadDocumentFileName"></param>
         /// <returns></returns>
-        private static string DownloadDocumentSwitcher(AmazonConnection amazonConnection, Config config)
+        private static string DownloadDocumentSwitcher(AmazonConnection amazonConnection, Document document)
         {
-            switch (config.downloadDocumentType)
+            switch (document.DownloadDocumentType)
             {
                 case "GET_FLAT_FILE_ACTIONABLE_ORDER_DATA_SHIPPING":
                 case "GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL":
                 case "GET_FLAT_FILE_ORDER_REPORT_DATA_SHIPPING":
-                    return DownloadFlatFileOrderReport(amazonConnection, config);
+                    return DownloadFlatFileOrderReport(amazonConnection, document);
 
                 default:
                     return "Failed: Invalid document type.";
@@ -95,13 +117,13 @@ namespace Amazon_Document_Transport_Utility
         /// <param name="documentUploadCompletedFolder"></param>
         /// <param name="documentUploadFailedFolder"></param>
         /// <returns></returns>
-        private static string UploadDocumentSwitcher(AmazonConnection amazonConnection, Config config)
+        private static string UploadDocumentSwitcher(AmazonConnection amazonConnection, Document document)
         {
-            switch (config.uploadDocumentType)
+            switch (document.UploadDocumentType)
             {
                 case "POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA":
                 case "POST_FLAT_FILE_FULFILLMENT_DATA":
-                    return UploadFlatFileFeed(amazonConnection, config);
+                    return UploadFlatFileFeed(amazonConnection, document);
                 default:
                     return "Failed: Invalid document type.";
             }
@@ -117,20 +139,20 @@ namespace Amazon_Document_Transport_Utility
         /// <param name="documentUploadCompletedFolder"></param>
         /// <param name="documentUploadFailedFolder"></param>
         /// <returns></returns>
-        private static string UploadFlatFileFeed(AmazonConnection amazonConnection, Config config)
+        private static string UploadFlatFileFeed(AmazonConnection amazonConnection, Document document)
         {
             // Scan the upload document folder for files.
-            if (Directory.Exists(config.documentUploadFolder))
+            if (Directory.Exists(document.DocumentUploadFolder))
             {
                 logger.Info("Scanning upload documents folder.");
 
                 try
                 {
-                    string[] files = Directory.GetFiles(config.documentUploadFolder);
+                    string[] files = Directory.GetFiles(document.DocumentUploadFolder);
 
                     // Convert the string report type to the enum.
                     FeedType reportType;
-                    Enum.TryParse<FeedType>(config.uploadDocumentType, out reportType);
+                    Enum.TryParse<FeedType>(document.UploadDocumentType, out reportType);
 
                     foreach (var file in files)
                     {
@@ -146,12 +168,12 @@ namespace Amazon_Document_Transport_Utility
                         {
                             Console.WriteLine("Uploading file: " + Path.GetFileName(file) + " Feed ID: " + feedID);
                             logger.Info("Uploading file: " + Path.GetFileName(file) + " Feed ID: " + feedID);
-                            File.Move(file, Path.Combine(config.documentUploadCompletedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
+                            File.Move(file, Path.Combine(document.DocumentUploadCompletedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
                         }
                         else
                         {
-                            File.Move(file, Path.Combine(config.documentUploadFailedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
-                            logger.Debug("Failed to upload flat file feed: " + config.uploadDocumentType + " " + file);
+                            File.Move(file, Path.Combine(document.DocumentUploadFailedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
+                            logger.Debug("Failed to upload flat file feed: " + document.UploadDocumentType + " " + file);
                         }
 
                         //while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
@@ -164,16 +186,16 @@ namespace Amazon_Document_Transport_Utility
                 }
                 catch (Exception e)
                 {
-                    logger.Info("Error uploading flat file feed: " + config.uploadDocumentType + " " + e.ToString());
-                    logger.Debug("Error uploading flat file feed: " + config.uploadDocumentType + " " + e.ToString());
+                    logger.Info("Error uploading flat file feed: " + document.UploadDocumentType + " " + e.ToString());
+                    logger.Debug("Error uploading flat file feed: " + document.UploadDocumentType + " " + e.ToString());
                     return "Failed";
                 }
             }
             else
             {
-                logger.Info("Failed: Upload documents folder does not exist: " + config.documentUploadFolder);
-                logger.Debug("Failed: Upload documents folder does not exist: " + config.documentUploadFolder);
-                return "Failed: Upload documents folder does not exist: " + config.documentUploadFolder;
+                logger.Info("Failed: Upload documents folder does not exist: " + document.DocumentUploadFolder);
+                logger.Debug("Failed: Upload documents folder does not exist: " + document.DocumentUploadFolder);
+                return "Failed: Upload documents folder does not exist: " + document.DocumentUploadFolder;
             }
 
             return "Success";
@@ -183,30 +205,30 @@ namespace Amazon_Document_Transport_Utility
         /// Function to download flat file report types. 
         /// </summary>
         /// <param name="amazonConnection"></param>
-        /// <param name="downloadDocumteType"></param>
+        /// <param name="downloadDocumentType"></param>
         /// <param name="documentDownloadFolder"></param>
         /// <param name="downloadDocumentFileName"></param>
         /// <returns></returns>
-        private static string DownloadFlatFileOrderReport(AmazonConnection amazonConnection, Config config)
+        private static string DownloadFlatFileOrderReport(AmazonConnection amazonConnection, Document document)
         {
 
             // Allow start and end dates. In the config file we have positive numbers but convert them to negatives to go backwards.
             DateTime startDate = DateTime.UtcNow.AddDays(-30);
             DateTime endDate = DateTime.UtcNow;
-            if (config.startDate != 0)
-                startDate = DateTime.UtcNow.AddDays(config.startDate * -1);
-            if (config.endDate != 0)
-                endDate = DateTime.UtcNow.AddDays(config.startDate * -1);
+            if (document.StartDate != 0)
+                startDate = DateTime.UtcNow.AddDays(document.StartDate * -1);
+            if (document.EndDate != 0)
+                endDate = DateTime.UtcNow.AddDays(document.StartDate * -1);
 
             try
             {
                 // Convert the string report type to the enum.
                 ReportTypes reportType;
-                Enum.TryParse<ReportTypes>(config.downloadDocumentType, out reportType);
+                Enum.TryParse<ReportTypes>(document.DownloadDocumentType, out reportType);
 
-                var report = amazonConnection.Reports.CreateReportAndDownloadFile(reportType, startDate, endDate, null, config.PII, null, 1000);
+                var report = amazonConnection.Reports.CreateReportAndDownloadFile(reportType, startDate, endDate, null, document.PII, null, 1000);
 
-                var destFile = Path.Combine(config.documentDownloadFolder, config.downloadDocumentFileName);
+                var destFile = Path.Combine(document.DocumentDownloadFolder, document.DownloadDocumentFileName);
 
                 // The library downloads the file to the windows user temp folder so we have to move it.
                 // Check if the file exists already and delete it.
@@ -217,14 +239,14 @@ namespace Amazon_Document_Transport_Utility
 
                     File.Move(report, destFile);
 
-                    logger.Info("Downloading document: " + config.downloadDocumentType + " Result: Success");
-                    Console.WriteLine("Downloading document: " + config.downloadDocumentType + " Result: Success");
+                    logger.Info("Downloading document: " + document.DownloadDocumentType + " Result: Success");
+                    Console.WriteLine("Downloading document: " + document.DownloadDocumentType + " Result: Success");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error downloading Report: " + config.downloadDocumentType + " " + e.ToString());
-                logger.Debug("Error downloading Report: " + config.downloadDocumentType + " " + e.ToString());
+                Console.WriteLine("Error downloading Report: " + document.DownloadDocumentType + " " + e.ToString());
+                logger.Debug("Error downloading Report: " + document.DownloadDocumentType + " " + e.ToString());
                 return "Failed";
             }
 
