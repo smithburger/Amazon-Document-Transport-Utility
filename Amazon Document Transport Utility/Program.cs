@@ -47,13 +47,13 @@ namespace Amazon_Document_Transport_Utility
                 MarketPlace =  MarketPlace.US //MarketPlace.GetMarketplaceByCountryCode(config.marketplace),
             });
 
-
             do
             {
+                Console.WriteLine("Processing documents: " + DateTime.Now.ToShortTimeString());
+
                 // Cycle through the document array and run all the downloads and uploads.
                 foreach (var document in config.Documents)
                 {
-                    Console.WriteLine("Processing documents: " + DateTime.Now.ToShortTimeString());
                     // Check if there is a download document type specified.
                     if (!String.IsNullOrEmpty(document.DownloadDocumentType))
                     {
@@ -76,11 +76,11 @@ namespace Amazon_Document_Transport_Utility
                     Thread.Sleep(config.ContinuousSeconds * 1000); // The config is in seconds so convert to milliseconds.
                 }
 
+                // Flush the log manager buffer after every cycle of the documents.
+                LogManager.Flush();
+
             } while (config.Continuous == true);
 
-            
-
-            
 
             // Explicitly close the logger so it clears the buffers. If you leave it to chance sometimes it will not purge the buffer and close the logs.
             LogManager.Shutdown();
