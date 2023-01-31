@@ -20,7 +20,8 @@
             "uploadDocumentType": "",
             "startDate": 0,
             "endDate": 0,
-            "PII": true
+            "PII": true,
+            "appendTimeStamp": false
         },
         {
             "documentDownloadFolder": "",
@@ -32,7 +33,8 @@
             "uploadDocumentType": "",
             "startDate": 0,
             "endDate": 0,
-            "PII": true
+            "PII": true,
+            "appendTimeStamp": false
         }
     ]
 }

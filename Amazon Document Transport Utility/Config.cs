@@ -74,5 +74,8 @@ namespace Amazon_Document_Transport_Utility
 
         [JsonPropertyName("PII")]
         public bool PII { get; set; }
+
+        [JsonPropertyName("appendTimeStamp")]
+        public bool AppendTimeStamp { get; set; }
     }
 }

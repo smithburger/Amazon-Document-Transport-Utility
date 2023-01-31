@@ -169,11 +169,11 @@ namespace Amazon_Document_Transport_Utility
                         {
                             Console.WriteLine("Uploading file: " + Path.GetFileName(file) + " Feed ID: " + feedID);
                             logger.Info("Uploading file: " + Path.GetFileName(file) + " Feed ID: " + feedID);
-                            File.Move(file, Path.Combine(document.DocumentUploadCompletedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
+                            File.Move(file, Path.Combine(document.DocumentUploadCompletedFolder, Path.GetFileName(file) + DateTime.Now.ToString("_yyyy-MM-dd_HHmmssffff")));
                         }
                         else
                         {
-                            File.Move(file, Path.Combine(document.DocumentUploadFailedFolder, Path.GetFileName(file) + DateTime.Now.ToString("yyyyMMddHHmmss")));
+                            File.Move(file, Path.Combine(document.DocumentUploadFailedFolder, Path.GetFileName(file) + DateTime.Now.ToString("_yyyy-MM-dd_HHmmssffff")));
                             logger.Debug("Failed to upload flat file feed: " + document.UploadDocumentType + " " + file);
                         }
 
@@ -229,12 +229,24 @@ namespace Amazon_Document_Transport_Utility
 
                 var report = amazonConnection.Reports.CreateReportAndDownloadFile(reportType, startDate, endDate, null, document.PII, null, 1000);
 
-                var destFile = Path.Combine(document.DocumentDownloadFolder, document.DownloadDocumentFileName);
-
                 // The library downloads the file to the windows user temp folder so we have to move it.
                 // Check if the file exists already and delete it.
                 if (!String.IsNullOrEmpty(report))
                 {
+                    var destFile = "";
+
+                    if (document.AppendTimeStamp)
+                    {
+                        // Append timestamp to the resulting downloaded report.
+                        destFile = Path.Combine(document.DocumentDownloadFolder, Path.GetFileNameWithoutExtension(document.DownloadDocumentFileName) + 
+                                                                                 DateTime.Now.ToString("_yyyy-MM-dd_HHmmssffff") + 
+                                                                                 Path.GetExtension(document.DownloadDocumentFileName));
+                    }
+                    else
+                    {
+                        destFile = Path.Combine(document.DocumentDownloadFolder, document.DownloadDocumentFileName);
+                    }
+
                     if (File.Exists(destFile))
                         File.Delete(destFile);
 
