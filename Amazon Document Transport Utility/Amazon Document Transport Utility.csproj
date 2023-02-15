@@ -25,7 +25,7 @@
     <Analyzer Include="..\packages\AWSSDK.SQS.3.7.100.19\analyzers\dotnet\cs\AWSSDK.SQS.CodeAnalysis.dll" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpAmazonSpAPI" Version="1.5.32" />
+    <PackageReference Include="CSharpAmazonSpAPI" Version="1.5.33" />
     <PackageReference Include="NLog" Version="5.1.1" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
