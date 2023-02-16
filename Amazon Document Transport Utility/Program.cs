@@ -159,7 +159,7 @@ namespace Amazon_Document_Transport_Utility
                     {
                         Console.WriteLine("Starting to upload file: " + Path.GetFileName(file));
                         logger.Info("Starting to upload file: " + Path.GetFileName(file));
-                        var feedID = amazonConnection.Feed.SubmitFeed(file, reportType, null, null, ContentType.TXT);
+                        var feedID = amazonConnection.Feed.SubmitFeed(file, reportType, null, null, ContentType.TXT, ContentFormate.File);
 
                         // Wait some time so we can get a Feed ID
                         Thread.Sleep(1000 * 30);
