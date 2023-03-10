@@ -102,6 +102,7 @@ namespace Amazon_Document_Transport_Utility
                 case "GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL":
                 case "GET_FLAT_FILE_ORDER_REPORT_DATA_SHIPPING":
                 case "GET_AMAZON_FULFILLED_SHIPMENTS_DATA_GENERAL":
+                case "GET_FLAT_FILE_RETURNS_DATA_BY_RETURN_DATE":
                     return DownloadFlatFileOrderReport(amazonConnection, document);
 
                 default:
