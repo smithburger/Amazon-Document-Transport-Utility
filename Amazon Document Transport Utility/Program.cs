@@ -35,6 +35,31 @@ namespace Amazon_Document_Transport_Utility
                 return;
             }
 
+            // Check for a command line argument.
+            // We allow one argument which is a json doc with documents to overwrite the base Config.json
+            // This allows us to use the same AMDU for multiple disparate purposes without making copies of the applicatiopn.
+            if (args.Count() > 0 
+                && args[0] == "-document"
+                && args[1].Contains(".json")) 
+            {
+                try
+                {
+                    Console.WriteLine("Loading command line documents file: " + args[1]);
+                    var documents = JsonSerializer.Deserialize<List<Document>>(File.ReadAllText(args[1]));
+                    config.Documents.Clear();
+                    config.Documents = documents;
+                    config.Continuous = false; // Turn off continuious mode for command line document configs.
+
+                    Console.WriteLine("Documents found: " + config.Documents.Count);
+                }
+                catch (Exception e )
+                {
+                    logger.Debug("Error loading command line documents json: " + e.ToString());
+                    return;
+                }
+            }
+
+
             // Setup the SP-API connection configuration class.
             AmazonConnection amazonConnection = new AmazonConnection(new AmazonCredential()
             {
@@ -103,6 +128,7 @@ namespace Amazon_Document_Transport_Utility
                 case "GET_FLAT_FILE_ORDER_REPORT_DATA_SHIPPING":
                 case "GET_AMAZON_FULFILLED_SHIPMENTS_DATA_GENERAL":
                 case "GET_FLAT_FILE_RETURNS_DATA_BY_RETURN_DATE":
+                case "GET_REFERRAL_FEE_PREVIEW_REPORT":
                     return DownloadFlatFileOrderReport(amazonConnection, document);
 
                 default:
