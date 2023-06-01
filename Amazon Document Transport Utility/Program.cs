@@ -129,6 +129,7 @@ namespace Amazon_Document_Transport_Utility
                 case "GET_AMAZON_FULFILLED_SHIPMENTS_DATA_GENERAL":
                 case "GET_FLAT_FILE_RETURNS_DATA_BY_RETURN_DATE":
                 case "GET_REFERRAL_FEE_PREVIEW_REPORT":
+                case "GET_FLAT_FILE_ACTIONABLE_ORDER_DATA":
                     return DownloadFlatFileOrderReport(amazonConnection, document);
 
                 default:
@@ -151,6 +152,7 @@ namespace Amazon_Document_Transport_Utility
             {
                 case "POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA":
                 case "POST_FLAT_FILE_FULFILLMENT_DATA":
+                case "POST_ORDER_ACKNOWLEDGEMENT_DATA":
                     return UploadFlatFileFeed(amazonConnection, document);
                 default:
                     return "Failed: Invalid document type.";
@@ -186,7 +188,12 @@ namespace Amazon_Document_Transport_Utility
                     {
                         Console.WriteLine("Starting to upload file: " + Path.GetFileName(file));
                         logger.Info("Starting to upload file: " + Path.GetFileName(file));
-                        var feedID = amazonConnection.Feed.SubmitFeed(file, reportType, null, null, ContentType.TXT, ContentFormate.File);
+
+                        // Get the ContentType from the file extension.
+                        ContentType contentType;
+                        Enum.TryParse<ContentType>(Path.GetExtension(file), out contentType);
+
+                        var feedID = amazonConnection.Feed.SubmitFeed(file, reportType, null, null, contentType, ContentFormate.File);
 
                         // Wait some time so we can get a Feed ID
                         Thread.Sleep(1000 * 30);
@@ -250,13 +257,16 @@ namespace Amazon_Document_Transport_Utility
             if (document.EndDate != 0)
                 endDate = DateTime.UtcNow.AddDays(document.StartDate * -1);
 
+            //Declare report out here so we can log the report ID for debugging
+            string report = "";
+
             try
             {
                 // Convert the string report type to the enum.
                 ReportTypes reportType;
                 Enum.TryParse<ReportTypes>(document.DownloadDocumentType, out reportType);
 
-                var report = amazonConnection.Reports.CreateReportAndDownloadFile(reportType, startDate, endDate, null, document.PII, null, 1000);
+                report = amazonConnection.Reports.CreateReportAndDownloadFile(reportType, startDate, endDate, null, document.PII, null, 1000);
 
                 // The library downloads the file to the windows user temp folder so we have to move it.
                 // Check if the file exists already and delete it.
@@ -281,14 +291,14 @@ namespace Amazon_Document_Transport_Utility
 
                     File.Move(report, destFile);
 
-                    logger.Info("Downloading document: " + document.DownloadDocumentType + " Result: Success");
-                    Console.WriteLine("Downloading document: " + document.DownloadDocumentType + " Result: Success");
+                    logger.Info("Downloading document: Report # " + report + " Report Type " + document.DownloadDocumentType + " Result: Success");
+                    Console.WriteLine("Downloading document: Report # " + report + " Report Type " + document.DownloadDocumentType + " Result: Success");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error downloading Report: " + document.DownloadDocumentType + " " + e.ToString());
-                logger.Debug("Error downloading Report: " + document.DownloadDocumentType + " " + e.ToString());
+                Console.WriteLine("Error downloading Report: Report # " + report + " Report Type " + document.DownloadDocumentType + " " + e.ToString());
+                logger.Debug("Error downloading Report: Report # " + report + " Report Type " + document.DownloadDocumentType + " " + e.ToString());
                 return "Failed";
             }
 
