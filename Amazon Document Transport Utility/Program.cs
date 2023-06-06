@@ -50,7 +50,7 @@ namespace Amazon_Document_Transport_Utility
                     config.Documents = documents;
                     config.Continuous = false; // Turn off continuious mode for command line document configs.
 
-                    Console.WriteLine("Documents found: " + config.Documents.Count);
+                    Console.WriteLine("Config Documents found: " + config.Documents.Count);
                 }
                 catch (Exception e )
                 {
@@ -175,19 +175,24 @@ namespace Amazon_Document_Transport_Utility
             if (Directory.Exists(document.DocumentUploadFolder))
             {
                 logger.Info("Scanning upload documents folder.");
+                Console.WriteLine("Scanning upload documents folder.");
+                string inPrgrossFile = "";
 
                 try
                 {
                     string[] files = Directory.GetFiles(document.DocumentUploadFolder);
 
+                    Console.WriteLine("Upload Documents Found: " + files.Count());
+
                     // Convert the string report type to the enum.
                     FeedType reportType;
-                    Enum.TryParse<FeedType>(document.UploadDocumentType, out reportType);
+                    Enum.TryParse<FeedType>(document.UploadDocumentType, out reportType);                    
 
                     foreach (var file in files)
                     {
                         Console.WriteLine("Starting to upload file: " + Path.GetFileName(file));
                         logger.Info("Starting to upload file: " + Path.GetFileName(file));
+                        inPrgrossFile = file;
 
                         // Get the ContentType from the file extension.
                         ContentType contentType;
@@ -212,19 +217,12 @@ namespace Amazon_Document_Transport_Utility
                             File.Move(file, Path.Combine(document.DocumentUploadFailedFolder, Path.GetFileName(file) + DateTime.Now.ToString("_yyyy-MM-dd_HHmmssffff")));
                             logger.Debug("Failed to upload flat file feed: " + document.UploadDocumentType + " " + file);
                         }
-
-                        //while (feedOutput.ProcessingStatus == FikaAmazonAPI.AmazonSpApiSDK.Models.Feeds.Feed.ProcessingStatusEnum.INPROGRESS)
-                        //{
-                            //Console.WriteLine("Monitoring status of uploaded feed id: " + feedID + " Status: " + feedOutput.ProcessingStatus);
-                            //Thread.Sleep(1000 * 30);
-                            //feedOutput = amazonConnection.Feed.GetFeed(feedID);
-                        //}
                     }
                 }
                 catch (Exception e)
                 {
-                    logger.Info("Error uploading flat file feed: " + document.UploadDocumentType + " " + e.ToString());
-                    logger.Debug("Error uploading flat file feed: " + document.UploadDocumentType + " " + e.ToString());
+                    logger.Info("Error uploading flat file feed: " + inPrgrossFile + " " + document.UploadDocumentType + " " + e.ToString());
+                    logger.Debug("Error uploading flat file feed: " + inPrgrossFile + " " + document.UploadDocumentType + " " + e.ToString());
                     return "Failed";
                 }
             }
