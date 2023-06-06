@@ -291,14 +291,14 @@ namespace Amazon_Document_Transport_Utility
 
                     File.Move(report, destFile);
 
-                    logger.Info("Downloading document: Report # " + report + " Report Type " + document.DownloadDocumentType + " Result: Success");
-                    Console.WriteLine("Downloading document: Report # " + report + " Report Type " + document.DownloadDocumentType + " Result: Success");
+                    logger.Info("Downloading document: Report Type " + document.DownloadDocumentType + " Result: Success");
+                    Console.WriteLine("Downloading document: Report Type " + document.DownloadDocumentType + " Result: Success");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error downloading Report: Report # " + report + " Report Type " + document.DownloadDocumentType + " " + e.ToString());
-                logger.Debug("Error downloading Report: Report # " + report + " Report Type " + document.DownloadDocumentType + " " + e.ToString());
+                Console.WriteLine("Error downloading Report: Report Type " + document.DownloadDocumentType + " " + e.ToString());
+                logger.Debug("Error downloading Report: Report Type " + document.DownloadDocumentType + " " + e.ToString());
                 return "Failed";
             }
 
