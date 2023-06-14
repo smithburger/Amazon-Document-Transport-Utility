@@ -130,6 +130,7 @@ namespace Amazon_Document_Transport_Utility
                 case "GET_FLAT_FILE_RETURNS_DATA_BY_RETURN_DATE":
                 case "GET_REFERRAL_FEE_PREVIEW_REPORT":
                 case "GET_FLAT_FILE_ACTIONABLE_ORDER_DATA":
+                case "GET_MERCHANT_LISTINGS_ALL_DATA":
                     return DownloadFlatFileOrderReport(amazonConnection, document);
 
                 default:
