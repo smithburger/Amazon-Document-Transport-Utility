@@ -154,6 +154,7 @@ namespace Amazon_Document_Transport_Utility
                 case "POST_FLAT_FILE_PRICEANDQUANTITYONLY_UPDATE_DATA":
                 case "POST_FLAT_FILE_FULFILLMENT_DATA":
                 case "POST_ORDER_ACKNOWLEDGEMENT_DATA":
+                case "JSON_LISTINGS_FEED":
                     return UploadFlatFileFeed(amazonConnection, document);
                 default:
                     return "Failed: Invalid document type.";
